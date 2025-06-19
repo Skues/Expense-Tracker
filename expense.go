@@ -24,7 +24,7 @@ func (e *Expenses) AddExpense(description string, amount float64) {
 	*e = append(*e, ex)
 }
 
-func (e *Expenses) UpdateExpense(id int, change string, value []string) error {
+func (e *Expenses) UpdateExpense(id int, change string, value ...string) error {
 	if id < 1 || id-1 > len(*e) {
 		return fmt.Errorf("%d out of range.", id)
 	}
