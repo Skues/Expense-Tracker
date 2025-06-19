@@ -30,19 +30,19 @@ func (e *Expenses) UpdateExpense(id int, change string, value ...string) error {
 	}
 	for i, _ := range *e {
 		if i == id-1 {
+			switch change {
+			case "description":
+				(*e)[i].description = value[0]
+			case "amount":
+				f, _ := strconv.ParseFloat(value[0], 64)
+				(*e)[i].amount = f
+			case "both":
+				(*e)[i].description = value[0]
+				f, _ := strconv.ParseFloat(value[1], 64)
+				(*e)[i].amount = f
+			}
+		}
 
-		}
-		switch change {
-		case "description":
-			(*e)[i].description = value[0]
-		case "amount":
-			f, _ := strconv.ParseFloat(value[0], 64)
-			(*e)[i].amount = f
-		case "both":
-			(*e)[i].description = value[0]
-			f, _ := strconv.ParseFloat(value[1], 64)
-			(*e)[i].amount = f
-		}
 	}
 	return nil
 }
