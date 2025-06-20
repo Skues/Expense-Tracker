@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-	scanner := bufio.NewScanner(os.Stdin)
 
 	exp := expense.Expenses{}
 	add := flag.Bool("add", false, "Adds an expense to the list")
@@ -19,13 +18,17 @@ func main() {
 	delete := flag.Int("delete", 0, "Deletes an expense from the list using an ID")
 	update := flag.Int("update", 0, "Updates an expense using its ID")
 
+	flag.Parse()
+	scanner := bufio.NewScanner(os.Stdin)
+
 	switch {
 	case *add:
-		fmt.Println("Enter the name of the Expense (Simple names recommended): ")
+		fmt.Println("Testing")
+		fmt.Fprintln(os.Stdout, "Enter the name of the Expense (Simple names recommended): ")
 		scanner.Scan()
 		title := scanner.Text()
 
-		fmt.Println("Enter the amount without a £ sign: ")
+		fmt.Fprintln(os.Stdout, "Enter the amount without a £ sign: ")
 		scanner.Scan()
 		amount, err := strconv.ParseFloat(scanner.Text(), 64)
 		if err != nil {
