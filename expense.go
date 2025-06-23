@@ -48,20 +48,35 @@ func (e *Expenses) UpdateExpense(id int, change string, value ...string) error {
 }
 
 func (e *Expenses) ListExpenses() (string, error) {
+	ex := expense{description: "Grad gown", amount: 42, createdAt: time.Now()}
+	*e = append(*e, ex)
 	if len(*e) == 0 {
 		return "", errors.New("List is empty.")
 	}
 	var sum float64
 	var formatted string
 	var formattedTime string
-	formatted = "\nExpenses:\n----------------\n"
+	formatted = "\nExpenses:\n----------------"
 	for _, value := range *e {
 		sum += value.amount
-		formattedTime = value.createdAt.Format("01 Feb")
-		formatted += fmt.Sprintf("\nExpenses:\n----------------\n%s:   %.2f | %s\n------------------\n", value.description, value.amount, formattedTime)
+		formattedTime = value.createdAt.Format("02 Jan")
+		formatted += fmt.Sprintf("\n%s:   £%.2f | %s\n------------------\n", value.description, value.amount, formattedTime)
 		formatted += fmt.Sprintf("Total Expenses: %.2f", sum)
 	}
 	return formatted, nil
+}
+
+func (e *Expenses) DisplaySummary() (string, error) {
+	var sum float64
+	if len(*e) <= 0 {
+		return "", errors.New("No items in the list of expenses.")
+	}
+	for _, value := range *e {
+		sum += value.amount
+	}
+	formatted := fmt.Sprintf("Your total expenses are: £%.2f", sum)
+	return formatted, nil
+
 }
 
 func (e *Expenses) DeleteExpense(id int) error {

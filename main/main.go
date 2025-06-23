@@ -13,10 +13,12 @@ import (
 func main() {
 
 	exp := expense.Expenses{}
+
 	add := flag.Bool("add", false, "Adds an expense to the list")
 	view := flag.Bool("view", false, "View all expenses")
 	delete := flag.Int("delete", 0, "Deletes an expense from the list using an ID")
 	update := flag.Int("update", 0, "Updates an expense using its ID")
+	summary := flag.Bool("summary", false, "Displays a summary of the expenses")
 
 	flag.Parse()
 	scanner := bufio.NewScanner(os.Stdin)
@@ -81,7 +83,15 @@ func main() {
 		err := exp.UpdateExpense(*update, change, description, amount)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
+
 		}
+	case *summary:
+		formatted, err := exp.DisplaySummary()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		fmt.Fprintln(os.Stdout, formatted)
 	}
 
 }
