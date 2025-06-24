@@ -26,7 +26,6 @@ func main() {
 	viewCmd := flag.NewFlagSet("view", flag.ExitOnError)
 	viewCategory := viewCmd.String("category", "", "View a specific category of expense")
 	viewMonth := viewCmd.String("month", "", "View a specific month of expenses")
-	viewSummary := viewCmd.Bool("summary", false, "View the summary of expenses")
 
 	deleteCmd := flag.NewFlagSet("delete", flag.ExitOnError)
 	deleteID := deleteCmd.Int("id", -1, "Deletes a specified ID")
@@ -36,6 +35,10 @@ func main() {
 	updateID := updateCmd.Int("id", 0, "Specifies the ID of the expense the user wants to update")
 	updateDesc := updateCmd.String("description", "", "Updates the description on a specified expense")
 	updateAmount := updateCmd.Float64("amount", 0, "Updades the amount on a specified expense")
+
+	summaryCmd := flag.NewFlagSet("summary", flag.ExitOnError)
+	summaryCategory := summaryCmd.String("category", "", "View the summary of a category of expenses")
+	summaryMonth := summaryCmd.String("month", "", "View the summary of a months expenses")
 
 	// view := flag.Bool("view", false, "View all expenses")
 	// delete := flag.Int("delete", 0, "Deletes an expense from the list using an ID")
@@ -54,20 +57,12 @@ func main() {
 	case "view":
 		viewCmd.Parse(os.Args[2:])
 
-		if *viewCategory == "" && *viewMonth == "" && *viewSummary == false {
-			output, err := exp.ListExpenses()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-			}
-			fmt.Fprintln(os.Stdout, output)
-		} else if *viewSummary {
-			output, err := exp.DisplaySummary()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(1)
-			}
-			fmt.Fprintln(os.Stdout, output)
+		output, err := exp.ListExpenses(*viewMonth, *viewCategory)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
 		}
+		fmt.Fprintln(os.Stdout, output)
 	case "delete":
 		deleteCmd.Parse(os.Args[2:])
 		if len(exp) == 0 {
@@ -87,6 +82,15 @@ func main() {
 			os.Exit(1)
 		}
 		exp.UpdateExpense(*updateID, *updateAmount, *updateDesc)
+	case "summary":
+		summaryCmd.Parse(os.Args[2:])
+		output, err := exp.DisplaySummary(*summaryCategory, *summaryMonth)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		fmt.Fprintln(os.Stdout, output)
+
 	}
 	// switch {
 	// case *add:

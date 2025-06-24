@@ -48,30 +48,54 @@ func (e *Expenses) UpdateExpense(id int, amount float64, description string) err
 	return nil
 }
 
-func (e *Expenses) ListExpenses() (string, error) {
+func (e *Expenses) ListExpenses(month string, category string) (string, error) {
 	if len(*e) == 0 {
 		return "", errors.New("List is empty.")
 	}
-	var sum float64
 	var formatted string
 	var formattedTime string
-	formatted = "\nExpenses:\n----------------"
-	for index, value := range *e {
-		sum += value.Amount
-		formattedTime = value.CreatedAt.Format("02 Jan")
-		formatted += fmt.Sprintf("\n%d - %s:   £%.2f | %s\n------------------\n", index+1, value.Description, value.Amount, formattedTime)
+	var counter int
+
+	formatted = "\nExpenses:\n"
+	if month == "" && category == "" {
+		for index, value := range *e {
+			formattedTime = value.CreatedAt.Format("02 Jan")
+			formatted += fmt.Sprintf("\n%d - %s:   £%.2f | %s\n------------------\n", index+1, value.Description, value.Amount, formattedTime)
+		}
+	} else if month != "" && category == "" {
+		formatted += fmt.Sprintf("----%s----", month)
+		for index, value := range *e {
+			formattedTime = value.CreatedAt.Format("02 Jan")
+			if value.CreatedAt.Month().String() == month {
+				counter += 1
+				formatted += fmt.Sprintf("\n%d - %s:   £%.2f | %s\n------------------\n", index+1, value.Description, value.Amount, formattedTime)
+			}
+		}
+		if counter == 0 {
+			formatted = fmt.Sprintf("No expenses found for %s.", month)
+		}
 	}
+
 	return formatted, nil
 }
 
-func (e *Expenses) DisplaySummary() (string, error) {
+func (e *Expenses) DisplaySummary(category string, month string) (string, error) {
 	var sum float64
 	if len(*e) <= 0 {
 		return "", errors.New("No items in the list of expenses.")
 	}
-	for _, value := range *e {
-		sum += value.Amount
+	if category == "" && month == "" {
+		for _, value := range *e {
+			sum += value.Amount
+		}
+	} else if month != "" {
+		for _, value := range *e {
+			if value.CreatedAt.Month().String() == month {
+				sum += value.Amount
+			}
+		}
 	}
+
 	formatted := fmt.Sprintf("Your total expenses are: £%.2f", sum)
 	return formatted, nil
 }
