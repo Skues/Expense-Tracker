@@ -11,9 +11,10 @@ import (
 	"project.com/expense"
 )
 
+const filename string = "expense.csv"
+
 func main() {
 
-	filename := "expenses.csv"
 	exp, err := LoadCSV(filename)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
