@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -27,22 +26,20 @@ func (e *Expenses) AddExpense(Description string, Amount float64) {
 	*e = append(*e, ex)
 }
 
-func (e *Expenses) UpdateExpense(id int, change string, amount string, description string) error {
+func (e *Expenses) UpdateExpense(id int, amount float64, description string) error {
 	if id < 1 || id-1 > len(*e) {
 		return fmt.Errorf("%d out of range.", id)
 	}
+
 	for i, _ := range *e {
 		if i == id-1 {
-			switch change {
-			case "description":
+			if amount != 0 && description != "" {
+				(*e)[i].Amount = amount
 				(*e)[i].Description = description
-			case "amount":
-				f, _ := strconv.ParseFloat(strings.Replace(amount, " ", "", -1), 64)
-				(*e)[i].Amount = f
-			case "both":
+			} else if amount != 0 {
+				(*e)[i].Amount = amount
+			} else if description != "" {
 				(*e)[i].Description = description
-				f, _ := strconv.ParseFloat(amount, 64)
-				(*e)[i].Amount = f
 			}
 		}
 
