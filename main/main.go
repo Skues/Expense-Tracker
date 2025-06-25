@@ -19,6 +19,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	balanceCmd := flag.NewFlagSet("balance", flag.ExitOnError)
+	balanceSet := balanceCmd.Float64("set", 0, "Sets the balance of the user")
+	balanceView := balanceCmd.Bool("view", false, "Views the current balance amount")
+	balanceAdd := balanceCmd.Float64("add", 0, "Adds an amount to your balance")
+
 	addCmd := flag.NewFlagSet("add", flag.ExitOnError)
 	addDesc := addCmd.String("description", "", "Adds the description to an expense")
 	addAmount := addCmd.Float64("amount", 0, "Adds the amount to an expense")
@@ -47,6 +52,25 @@ func main() {
 
 	// scanner := bufio.NewScanner(os.Stdin)
 	switch os.Args[1] {
+	case "balance":
+		balanceCmd.Parse(os.Args[2:])
+		if *balanceSet > 0 {
+			err := exp.SetBalance(*balanceSet)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+			}
+		} else if *balanceView {
+			balance, err := expense.CurrentBalance()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+
+			fmt.Fprintf(os.Stdout, "Your current balance is: £%v\n", balance)
+		} else if *balanceAdd > 0 {
+			expense.AlterBalance(-*balanceAdd)
+		}
+
 	case "add":
 		addCmd.Parse(os.Args[2:])
 		exp.AddExpense(*addDesc, *addAmount)
@@ -74,6 +98,11 @@ func main() {
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 			}
+		} else {
+			exp = expense.Expenses{}
+		}
+		if err := exp.SaveFile(filename); err != nil {
+			fmt.Fprintln(os.Stderr, err)
 		}
 	case "update":
 		updateCmd.Parse(os.Args[2:])

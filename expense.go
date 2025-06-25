@@ -17,6 +17,11 @@ type Expense struct {
 
 type Expenses []Expense
 
+type Personal struct {
+	Balance float64
+	Salary  float64
+}
+
 func (e *Expenses) AddExpense(Description string, Amount float64) {
 	var ex Expense = Expense{
 		Description,
@@ -24,6 +29,7 @@ func (e *Expenses) AddExpense(Description string, Amount float64) {
 		time.Now()}
 
 	*e = append(*e, ex)
+	AlterBalance(Amount)
 }
 
 func (e *Expenses) UpdateExpense(id int, amount float64, description string) error {
@@ -105,6 +111,7 @@ func (e *Expenses) DeleteExpense(id int) error {
 		return fmt.Errorf("%d out of range.", id)
 	}
 	index := id - 1
+	AlterBalance(-((*e)[index].Amount))
 	*e = append((*e)[index+1:], (*e)[:index]...)
 	return nil
 }
@@ -129,4 +136,48 @@ func (e *Expenses) SaveFile(filename string) error {
 	csvWriter.Flush()
 	return nil
 
+}
+
+func (e *Expenses) SetBalance(balance float64) error {
+	file, err := os.Create("balance.txt")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	balanceStr := strconv.FormatFloat(balance, 'f', -1, 64)
+	_, err = file.Write([]byte(balanceStr))
+	if err != nil {
+		return err
+	}
+	file.Sync()
+	return nil
+}
+
+func AlterBalance(amount float64) {
+	balance, _ := CurrentBalance()
+	newBalance := balance - amount
+	saveBalance(newBalance)
+}
+
+func CurrentBalance() (float64, error) {
+	bytes, err := os.ReadFile("balance.txt")
+	if err != nil {
+		return 0, err
+	}
+	balance, err := strconv.ParseFloat(string(bytes), 64)
+	return balance, err
+
+}
+
+func saveBalance(balance float64) {
+	file, err := os.Create("balance.txt")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+	defer file.Close()
+	_, err = file.WriteString(strconv.FormatFloat(balance, 'f', -1, 64))
+	if err != nil {
+		fmt.Fprint(os.Stderr, "testsing")
+		fmt.Fprintln(os.Stderr, err)
+	}
 }
